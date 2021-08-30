@@ -47,5 +47,10 @@ module.exports = {
                 ] + 1 || 1
             )
         );
+        interaction.options.getUser("user").send(`:x: You have now been warned **${
+            getGuild(interaction.guild.id).warns[
+                interaction.options.getUser("user").id
+            ]
+        }** times on the server **${interaction.guild.name}**. Please stop breaking the rules in the future!`)
     },
 };

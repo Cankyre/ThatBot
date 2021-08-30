@@ -2,8 +2,9 @@ const fs = require("fs");
 const { Client, Collection, Intents } = require("discord.js");
 
 require("dotenv").config();
+const client = new Client({intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS] , partials: ['USER', 'REACTION', 'MESSAGE'] });
 
-const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+const { RRData } = require("./resources/utilityResources")
 
 client.commands = new Collection();
 const commandFiles = fs
@@ -16,7 +17,7 @@ for (const file of commandFiles) {
     client.commands.set(command.data.name, command);
 }
 
-client.once("ready", () => {
+client.once("ready", async () => {
     console.log("Ready!");
 });
 
@@ -37,5 +38,27 @@ client.on("interactionCreate", async (interaction) => {
         });
     }
 });
+
+client.on("messageReactionAdd", async (reaction, user) => {
+    try {
+        if (!user.bot) {
+            const role = await reaction.message.guild.roles.fetch(RRData.get(reaction.message.id + reaction.emoji.name + reaction.emoji.id));
+            (await role.guild.members.fetch(user.id)).roles.add(role)
+        }
+    } catch (err) {
+
+    }
+})
+
+client.on('messageReactionRemove', async (reaction, user) => {
+    try {
+        if (!user.bot) {
+            const role = await reaction.message.guild.roles.fetch(RRData.get(reaction.message.id + reaction.emoji.name + reaction.emoji.id));
+            (await role.guild.members.fetch(user.id)).roles.remove(role)
+        }
+    } catch (err) {
+
+    }
+})
 
 client.login(process.env.TOKEN);
