@@ -18,6 +18,8 @@ for (const file of commandFiles) {
 }
 
 client.once("ready", async () => {
+    const guilds = client.guilds.cache.map(i => i.id)
+    require('./slash')(guilds)
     console.log("Ready!");
 });
 
@@ -59,6 +61,12 @@ client.on('messageReactionRemove', async (reaction, user) => {
     } catch (err) {
 
     }
+})
+
+client.on('guildCreate', (guild) => {
+    console.log("Reloading slash commands...")
+    const guilds = [guild.id]
+    require('./slash')(guilds)
 })
 
 client.login(process.env.TOKEN);

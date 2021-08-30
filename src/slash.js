@@ -1,9 +1,8 @@
-const fs = require("fs");
+module.exports = (guild_ids) => {const fs = require("fs");
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
 require("dotenv").config();
 const clientId = process.env.CLIENT_ID;
-const guildId = process.env.GUILD_ID;
 const token = process.env.TOKEN;
 const commands = [];
 const commandFiles = fs
@@ -14,13 +13,17 @@ for (const file of commandFiles) {
     commands.push(command.data.toJSON());
 }
 const rest = new REST({ version: "9" }).setToken(token);
-(async () => {
-    try {
-        await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
-            body: commands,
-        });
-        console.log("Successfully registered application commands.");
-    } catch (error) {
-        console.error(error);
-    }
-})();
+guild_ids.forEach(guildId => {
+    (async () => {
+        try {
+            await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
+                body: commands,
+            });
+            console.log("Successfully registered application commands for guild " + guildId + ".");
+        } catch (error) {
+            console.error(error);
+        }
+    })()
+    ;
+})
+}
