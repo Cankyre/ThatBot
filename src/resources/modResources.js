@@ -49,8 +49,19 @@ const GuildSchema = {
     bans: {},
 };
 
+function getGuild(id) {
+    let _data = ModData.get(id);
+    if (_data) {
+        return _data;
+    } else {
+        ModData.set(id, GuildSchema);
+        return GuildSchema;
+    }
+}
+
 module.exports = {
     ModData,
     warnEmbed,
+    getGuild,
     GuildSchema,
 };
