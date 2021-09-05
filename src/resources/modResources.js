@@ -31,11 +31,49 @@ const warnEmbed = (user, warns) => {
     };
 };
 
+const banEmbed = (user, timeOut, reason) => {
+    return {
+        embeds: [
+            {
+                type: "rich",
+                title: `Banned user ${user.username}#${user.discriminator}`,
+                description: `They are now banned for${
+                    timeOut ? " " + timeOut + " minutes" : "ever"
+                }, ${
+                    reason
+                        ? "for the reason: **" + reason + "**"
+                        : "no reason was provided"
+                }.`,
+                color: 0x000000,
+                image: {
+                    url: [...globalImages, ...banImages][
+                        Math.floor(
+                            Math.random() *
+                                [...globalImages, ...banImages].length
+                        )
+                    ],
+                    height: 0,
+                    width: 0,
+                },
+                timestamp: Date.now(),
+                footer: {
+                    text: "ThatBot v." + version,
+                },
+            },
+        ],
+    };
+};
+
 const globalImages = [
     "https://cdn.pixabay.com/photo/2018/08/01/14/04/gavel-3577254_960_720.jpg",
     "https://cdn.pixabay.com/photo/2017/07/10/23/49/club-2492011_960_720.jpg",
     "https://cdn.pixabay.com/photo/2017/02/12/14/00/justice-2060093_960_720.jpg",
     "https://cdn.pixabay.com/photo/2016/07/11/11/10/law-1509436_960_720.jpg",
+];
+
+const banImages = [
+    "https://support.discord.com/hc/user_images/VyBNe45AF5zHtCat69rZ5Q.jpg",
+    "https://i0.wp.com/www.alphr.com/wp-content/uploads/2018/12/discord-banned.jpg",
 ];
 
 const warnImages = [
@@ -62,6 +100,7 @@ function getGuild(id) {
 module.exports = {
     ModData,
     warnEmbed,
+    banEmbed,
     getGuild,
     GuildSchema,
 };

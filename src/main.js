@@ -2,9 +2,13 @@ const fs = require("fs");
 const { Client, Collection, Intents } = require("discord.js");
 
 require("dotenv").config();
-const client = new Client({intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS] , partials: ['USER', 'REACTION', 'MESSAGE'] });
+const client = new Client({
+    intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS],
+    partials: ["USER", "REACTION", "MESSAGE"],
+});
 
-const { RRData } = require("./resources/utilityResources")
+const { RRData } = require("./resources/utilityResources");
+const { ModData } = require("./resources/modResources");
 
 client.commands = new Collection();
 const commandFiles = fs
@@ -18,8 +22,9 @@ for (const file of commandFiles) {
 }
 
 client.once("ready", async () => {
-    const guilds = client.guilds.cache.map(i => i.id)
-    require('./slash')(guilds)
+    if (process.argv.indexOf("--dev") + 1) {
+        require("./slash")(["820704776425439244"]);
+    }
     console.log("Ready!");
 });
 
@@ -44,29 +49,53 @@ client.on("interactionCreate", async (interaction) => {
 client.on("messageReactionAdd", async (reaction, user) => {
     try {
         if (!user.bot) {
-            const role = await reaction.message.guild.roles.fetch(RRData.get(reaction.message.id + reaction.emoji.name + reaction.emoji.id));
-            (await role.guild.members.fetch(user.id)).roles.add(role)
+            const role = await reaction.message.guild.roles.fetch(
+                RRData.get(
+                    reaction.message.id +
+                        reaction.emoji.name +
+                        reaction.emoji.id
+                )
+            );
+            (await role.guild.members.fetch(user.id)).roles.add(role);
         }
-    } catch (err) {
+    } catch (err) {}
+});
 
-    }
-})
-
-client.on('messageReactionRemove', async (reaction, user) => {
+client.on("messageReactionRemove", async (reaction, user) => {
     try {
         if (!user.bot) {
-            const role = await reaction.message.guild.roles.fetch(RRData.get(reaction.message.id + reaction.emoji.name + reaction.emoji.id));
-            (await role.guild.members.fetch(user.id)).roles.remove(role)
+            const role = await reaction.message.guild.roles.fetch(
+                RRData.get(
+                    reaction.message.id +
+                        reaction.emoji.name +
+                        reaction.emoji.id
+                )
+            );
+            (await role.guild.members.fetch(user.id)).roles.remove(role);
         }
-    } catch (err) {
+    } catch (err) {}
+});
 
-    }
-})
+client.on("guildCreate", (guild) => {
+    console.log("Reloading slash commands...");
+    const guilds = [guild.id];
+    require("./slash")(guilds);
+});
 
-client.on('guildCreate', (guild) => {
-    console.log("Reloading slash commands...")
-    const guilds = [guild.id]
-    require('./slash')(guilds)
-})
+async function checkBans() {
+    var data = ModData.read();
+    Object.keys(data).forEach((guild) => {
+        Object.keys(data[guild].bans).forEach((player) => {
+            if (data[guild].bans[player][0] <= Date.now()) {
+                client.guilds.fetch(guild).then((guild) => {
+                    guild.members.unban(player).catch(() => {});
+                    ModData.unset(`${guild.id}.bans.${player}`);
+                });
+            }
+        });
+    });
+}
+
+setInterval(() => checkBans().catch(console.error), 60000);
 
 client.login(process.env.TOKEN);
