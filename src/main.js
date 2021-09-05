@@ -24,8 +24,11 @@ for (const file of commandFiles) {
 client.once("ready", async () => {
     if (process.argv.indexOf("--dev") + 1) {
         require("./slash")(["820704776425439244"]);
+    } else if (process.argv.indexOf("--reload") + 1) {
+        const guilds = (await client.guilds.fetch()).map(i => i.id);
+        require("./slash")(guilds)
     }
-    console.log("Ready!");
+    console.log("Ready!"); 
 });
 
 client.on("interactionCreate", async (interaction) => {
