@@ -69,6 +69,7 @@ module.exports = {
                             : "no reason was provided."
                     }. Please stop breaking the rules in the future!`
                 )
+                .catch(() => {})
                 .then(() => {
                     interaction.reply(
                         setUserBans(
